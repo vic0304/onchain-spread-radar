@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "onchain-spread-radar"
+version = "0.1.0"
+description = "Read-only on-chain versus CEX spread radar"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "ccxt>=4.5,<5",
+  "fastapi>=0.115,<1",
+  "httpx>=0.28,<1",
+  "python-dotenv>=1.0,<2",
+  "uvicorn>=0.30,<1",
+]
+
+[project.scripts]
+spread-radar = "spread_radar.cli:main"
+spread-radar-web = "spread_radar.web:main"
+spread-radar-alerts = "spread_radar.alerts:main"
+spread-radar-telegram-test = "spread_radar.telegram_test:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/spread_radar"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

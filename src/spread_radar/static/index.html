@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>链上 / CEX 价差雷达</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <p class="eyebrow">READ-ONLY · NO TRADING</p>
+        <h1>链上 / CEX 价差雷达</h1>
+        <p>发现高成交量候选，再筛选“链上买入 / CEX 卖出”的潜在净价差。</p>
+      </section>
+
+      <section class="panel controls">
+        <form id="scan-form">
+          <label>候选源
+            <select id="source" name="source">
+              <option value="geckoterminal">GeckoTerminal（免费）</option>
+              <option value="okx">OKX Hot Token（无凭证时自动用免费数据）</option>
+            </select>
+          </label>
+          <label>网络 / Chain ID
+            <input id="network" name="network" value="bsc" maxlength="32">
+          </label>
+          <label>候选数量
+            <input id="candidate-limit" name="candidate_limit" type="number" value="20" min="1" max="100">
+          </label>
+          <label>全成本缓冲（bps）
+            <input id="cost" name="all_in_cost_bps" type="number" value="150" min="0">
+          </label>
+          <label>最小净价差（bps）
+            <input id="threshold" name="min_net_bps" type="number" value="50" min="0">
+          </label>
+          <label>单边最大代币税率（bps）
+            <input id="max-token-tax" name="max_token_tax_bps" type="number" value="500" min="0" max="10000">
+          </label>
+          <fieldset>
+            <legend>市场类型</legend>
+            <label class="check"><input type="checkbox" name="market" value="spot" checked> 现货</label>
+            <label class="check"><input type="checkbox" name="market" value="swap" checked> 永续</label>
+          </fieldset>
+          <fieldset>
+            <legend>交易所</legend>
+            <label class="check"><input type="checkbox" name="exchange" value="binance"> Binance</label>
+            <label class="check"><input type="checkbox" name="exchange" value="okx"> OKX</label>
+            <label class="check"><input type="checkbox" name="exchange" value="bybit"> Bybit</label>
+            <label class="check"><input type="checkbox" name="exchange" value="gate" checked> Gate</label>
+          </fieldset>
+          <button id="scan-button" type="submit">开始扫描</button>
+        </form>
+        <p class="hint">默认使用 Gate 快速扫描 20 个候选。Binance、OKX、Bybit 可按需勾选；连接失败会在 5 秒后显示为告警。要做完整前 100 比较，可手动改为 100。</p>
+      </section>
+
+      <section id="status" class="status" aria-live="polite">准备就绪。</section>
+      <section id="summary" class="summary" hidden></section>
+      <section id="results" class="panel" hidden>
+        <h2>潜在机会</h2>
+        <p class="subtle">仅为筛选结果。请自行验证合约、深度、充提、跨链、资金费与两腿执行。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>代币</th><th>交易所</th><th>市场</th><th>链上价</th><th>CEX 最优买价</th><th>毛价差</th><th>净价差</th><th>24h 链上量</th><th>流动性</th></tr></thead>
+            <tbody id="result-body"></tbody>
+          </table>
+        </div>
+      </section>
+      <section id="warnings" class="panel warnings" hidden></section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
