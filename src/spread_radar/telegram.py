@@ -14,6 +14,29 @@ from .errors import NotificationError
 from .models import SpreadOpportunity
 
 
+CHAIN_LABELS = {
+    "1": "Ethereum（ETH · Chain ID 1）",
+    "eth": "Ethereum（ETH · Chain ID 1）",
+    "10": "Optimism（OP · Chain ID 10）",
+    "optimism": "Optimism（OP · Chain ID 10）",
+    "56": "BNB Smart Chain（BSC · Chain ID 56）",
+    "bsc": "BNB Smart Chain（BSC · Chain ID 56）",
+    "137": "Polygon PoS（Chain ID 137）",
+    "polygon_pos": "Polygon PoS（Chain ID 137）",
+    "8453": "Base（Chain ID 8453）",
+    "base": "Base（Chain ID 8453）",
+    "42161": "Arbitrum One（Chain ID 42161）",
+    "arbitrum": "Arbitrum One（Chain ID 42161）",
+}
+
+
+def describe_chain(network: str) -> str:
+    """Render a readable network name while preserving an unknown source id."""
+
+    normalized = network.strip().lower()
+    return CHAIN_LABELS.get(normalized, f"未映射网络（{network}）")
+
+
 def format_alert(opportunities: Sequence[SpreadOpportunity]) -> str:
     """Produce one concise, plain-text message within Telegram's limits."""
 
@@ -25,10 +48,18 @@ def format_alert(opportunities: Sequence[SpreadOpportunity]) -> str:
     for item in opportunities:
         token = item.token
         quote = item.quote
+        market_label = "合约" if quote.market_type == "swap" else "现货"
+        bid_depth = (
+            f"前 {quote.bid_levels} 档买盘 ${quote.bid_depth_usd:,.0f}"
+            if quote.bid_levels and quote.bid_depth_usd > 0
+            else "订单簿深度未返回"
+        )
         lines.extend(
             (
-                f"{token.symbol} · {token.network} · {quote.exchange} {quote.market_type}",
-                f"链上 ${token.onchain_price_usd:.8g} → CEX 买价 ${quote.bid:.8g}",
+                f"{token.symbol} · {quote.exchange} {market_label}",
+                f"链：{describe_chain(token.network)}",
+                f"链上 ${token.onchain_price_usd:.8g} → CEX {market_label} 买一 ${quote.bid:.8g}",
+                f"CEX 盘口：买一 ${quote.bid:.8g} | 卖一 ${quote.ask:.8g} | 卖出方向深度：{bid_depth}",
                 f"毛价差 {item.gross_spread_bps / 100:.2f}% | 预设成本 "
                 f"{item.all_in_cost_bps / 100:.2f}% | 代币税 "
                 f"{item.token_tax_cost_bps / 100:.2f}% | 净价差 {item.net_spread_bps / 100:.2f}%",
@@ -38,7 +69,7 @@ def format_alert(opportunities: Sequence[SpreadOpportunity]) -> str:
                 "",
             )
         )
-    lines.append("请自行核验同名资产、盘口深度、充提状态、滑点、Gas 与资金费。")
+    lines.append("盘口深度仅为该 CEX 返回的前 5 档快照，不等于你的下单规模可全部成交。请自行核验同名资产、充提状态、滑点、Gas 与资金费。")
     return "\n".join(lines)
 
 

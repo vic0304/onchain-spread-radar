@@ -27,6 +27,10 @@ class CexQuote:
     market_type: str
     bid: float
     ask: float
+    bid_depth_usd: float = 0.0
+    ask_depth_usd: float = 0.0
+    bid_levels: int = 0
+    ask_levels: int = 0
 
 
 @dataclass(frozen=True, slots=True)

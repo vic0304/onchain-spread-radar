@@ -9,7 +9,7 @@ from spread_radar.telegram import TelegramNotifier, format_alert
 
 def _opportunity() -> SpreadOpportunity:
     token = TokenCandidate("FOO", "0xAbC", "bsc", 1.0, 1_000_000, 500_000, "test")
-    quote = CexQuote("gate", "FOO/USDT", "spot", 1.03, 1.04)
+    quote = CexQuote("gate", "FOO/USDT", "spot", 1.03, 1.04, 12_345, 8_765, 5, 5)
     return SpreadOpportunity(token, quote, 300, 150, 0, 150)
 
 
@@ -17,7 +17,9 @@ def test_alert_text_contains_the_executable_screen_and_risk_note() -> None:
     text = format_alert([_opportunity()])
 
     assert "FOO" in text
-    assert "CEX 买价 $1.03" in text
+    assert "BNB Smart Chain（BSC · Chain ID 56）" in text
+    assert "CEX 现货 买一 $1.03" in text
+    assert "前 5 档买盘 $12,345" in text
     assert "净价差 1.50%" in text
     assert "自行核验" in text
 

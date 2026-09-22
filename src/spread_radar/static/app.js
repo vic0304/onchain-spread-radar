@@ -63,6 +63,7 @@ function updateResults(payload) {
       tableCell(item.quote.market_type),
       tableCell(price(item.token.onchain_price_usd)),
       tableCell(price(item.quote.bid)),
+      tableCell(`$${money(item.quote.bid_depth_usd || 0)}`),
       tableCell(percent(item.gross_spread_bps)),
       tableCell(percent(item.net_spread_bps), 'net'),
       tableCell(`$${money(item.token.volume_24h_usd)}`),
@@ -73,7 +74,7 @@ function updateResults(payload) {
   if (!payload.opportunities.length) {
     const row = document.createElement('tr');
     const cell = tableCell('没有结果通过当前净价差阈值。', 'empty');
-    cell.colSpan = 9;
+    cell.colSpan = 10;
     row.append(cell);
     body.append(row);
   }

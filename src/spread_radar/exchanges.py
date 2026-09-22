@@ -29,6 +29,23 @@ def _market_type(market: dict) -> str:
     return "spot" if market.get("spot") else "swap"
 
 
+def _depth_usd(levels: list[object], maximum_levels: int = 5) -> tuple[float, int]:
+    """Return executable notional visible in the requested top book levels."""
+
+    depth = 0.0
+    counted_levels = 0
+    for level in levels[:maximum_levels]:
+        try:
+            price, amount = float(level[0]), float(level[1])
+        except (IndexError, TypeError, ValueError):
+            continue
+        if price <= 0 or amount <= 0:
+            continue
+        depth += price * amount
+        counted_levels += 1
+    return depth, counted_levels
+
+
 class CexQuoteSource:
     """Fetch top-of-book CEX quotes without credentials or trading rights."""
 
@@ -123,10 +140,16 @@ class CexQuoteSource:
         ask = float(asks[0][0])
         if bid <= 0 or ask <= 0:
             return None
+        bid_depth_usd, bid_levels = _depth_usd(bids)
+        ask_depth_usd, ask_levels = _depth_usd(asks)
         return CexQuote(
             exchange=exchange_id,
             market_symbol=market["symbol"],
             market_type=_market_type(market),
             bid=bid,
             ask=ask,
+            bid_depth_usd=bid_depth_usd,
+            ask_depth_usd=ask_depth_usd,
+            bid_levels=bid_levels,
+            ask_levels=ask_levels,
         )
